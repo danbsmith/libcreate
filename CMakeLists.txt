@@ -69,6 +69,7 @@ set(EXAMPLES
   packets
   play_song
   wheeldrop
+  overcurrent
 )
 
 foreach(EXAMPLE ${EXAMPLES})
