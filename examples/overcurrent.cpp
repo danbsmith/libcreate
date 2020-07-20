@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "create/create.h"
 
 #include <iostream>
+#include "poll.h"
 
 int main(int argc, char** argv) {
   // Select robot. Assume Create 2 unless argument says otherwise
@@ -59,8 +60,18 @@ int main(int argc, char** argv) {
 
   // Switch to Full mode
   robot.setMode(create::MODE_FULL);
-
-  while (true) {
+  
+  std::string should_continue; 
+  std::cout << "This example program will run all of the Create's motors to demonstrate overcurrent sensing.  Press 'y' to continue: ";
+  std::cin >> should_continue;
+  if(should_continue[0] != 'y') return 0;
+  std::cout << "The test can be stopped by pressing 'enter'" << std::endl;
+  struct pollfd just_stdin;
+  just_stdin.fd = 0;
+  just_stdin.events = POLLIN;
+  robot.setAllMotors(1.0, 1.0, 0.0);
+  robot.driveWheels(1.0, 1.0);
+  while (poll(&just_stdin, 1, 0) == 0) {
     // Get overcurrent status
     const bool wheel_overcurrent = robot.isWheelOvercurrent();
     const bool mainbrush_overcurrent = robot.isMainBrushOvercurrent();
@@ -77,6 +88,7 @@ int main(int argc, char** argv) {
 
     usleep(10000);  // 10 Hz
   }
-
+  robot.driveWheels(0.0, 0.0);
+  robot.setAllMotors(0.0, 0.0, 0.0);
   return 0;
 }
